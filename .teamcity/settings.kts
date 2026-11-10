@@ -31,6 +31,14 @@ project {
 }
 
 
+/*
+Branch demo: this file is versioned per branch. With versioned settings set to
+"use settings from the current branch", each branch's copy of this script
+defines what TeamCity shows for that branch. Change BRANCH_MARKER (and the jobs)
+on another branch to see the difference in the UI.
+*/
+const val BRANCH_MARKER = "claude/cool-mccarthy-o7nzc2"
+
 object TeamcityCiDemo : Pipeline({
     name = "Teamcity Ci Demo"
 
@@ -38,10 +46,44 @@ object TeamcityCiDemo : Pipeline({
         repository(DslContext.settingsRoot)
     }
 
-    job(TeamcityCiDemo_Job1)
+    job(TeamcityCiDemo_Build)
+    job(TeamcityCiDemo_Test) {
+        dependsOn(TeamcityCiDemo_Build)
+    }
+    job(TeamcityCiDemo_BranchInfo) {
+        dependsOn(TeamcityCiDemo_Test)
+    }
 })
 
-object TeamcityCiDemo_Job1 : Job({
-    id("Job1")
-    name = "Job 1"
+object TeamcityCiDemo_Build : Job({
+    id("Build")
+    name = "Build"
+    steps {
+        script {
+            name = "Build"
+            scriptContent = "echo Building from settings on branch $BRANCH_MARKER"
+        }
+    }
+})
+
+object TeamcityCiDemo_Test : Job({
+    id("Test")
+    name = "Test"
+    steps {
+        script {
+            name = "Test"
+            scriptContent = "echo Running tests"
+        }
+    }
+})
+
+object TeamcityCiDemo_BranchInfo : Job({
+    id("BranchInfo")
+    name = "Branch Info"
+    steps {
+        script {
+            name = "Print branch"
+            scriptContent = "echo Branch: %teamcity.build.branch%"
+        }
+    }
 })
