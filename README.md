@@ -11,7 +11,7 @@ In the TeamCity project: Settings > Versioned Settings, set
 "Settings format" to Kotlin and "Use settings from VCS" to
 **Use settings from the current branch (or default if absent)**.
 
-Then on any branch, edit `.teamcity/settings.kts` (e.g. `BRANCH_MARKER`, add or
+Then on any branch, edit `.teamcity/settings.kts` (e.g. `BranchDemo.MARKER`, add or
 remove a `job(...)`) and push. Each branch's build shows its own pipeline
 definition in the UI.
 

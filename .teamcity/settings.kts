@@ -1,5 +1,6 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.pipelines.*
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
 /*
 The settings script is an entry point for defining a TeamCity
@@ -34,10 +35,12 @@ project {
 /*
 Branch demo: this file is versioned per branch. With versioned settings set to
 "use settings from the current branch", each branch's copy of this script
-defines what TeamCity shows for that branch. Change BRANCH_MARKER (and the jobs)
+defines what TeamCity shows for that branch. Change BranchDemo.MARKER (and the jobs)
 on another branch to see the difference in the UI.
 */
-const val BRANCH_MARKER = "claude/cool-mccarthy-o7nzc2"
+object BranchDemo {
+    const val MARKER = "claude/cool-mccarthy-o7nzc2"
+}
 
 object TeamcityCiDemo : Pipeline({
     name = "Teamcity Ci Demo"
@@ -47,12 +50,8 @@ object TeamcityCiDemo : Pipeline({
     }
 
     job(TeamcityCiDemo_Build)
-    job(TeamcityCiDemo_Test) {
-        dependsOn(TeamcityCiDemo_Build)
-    }
-    job(TeamcityCiDemo_BranchInfo) {
-        dependsOn(TeamcityCiDemo_Test)
-    }
+    job(TeamcityCiDemo_Test)
+    job(TeamcityCiDemo_BranchInfo)
 })
 
 object TeamcityCiDemo_Build : Job({
@@ -61,7 +60,7 @@ object TeamcityCiDemo_Build : Job({
     steps {
         script {
             name = "Build"
-            scriptContent = "echo Building from settings on branch $BRANCH_MARKER"
+            scriptContent = "echo Building from settings on branch ${BranchDemo.MARKER}"
         }
     }
 })
@@ -69,6 +68,7 @@ object TeamcityCiDemo_Build : Job({
 object TeamcityCiDemo_Test : Job({
     id("Test")
     name = "Test"
+    dependency(TeamcityCiDemo_Build)
     steps {
         script {
             name = "Test"
@@ -80,6 +80,7 @@ object TeamcityCiDemo_Test : Job({
 object TeamcityCiDemo_BranchInfo : Job({
     id("BranchInfo")
     name = "Branch Info"
+    dependency(TeamcityCiDemo_Test)
     steps {
         script {
             name = "Print branch"
